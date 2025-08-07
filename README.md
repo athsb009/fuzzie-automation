@@ -213,14 +213,6 @@ The application includes comprehensive logging:
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support, please open an issue on GitHub or contact the development team.
-
 ---
 
-Built with ❤️ using Next.js, React, and TypeScript
+Built with ❤️ using Next.js, React, and TypeScript by Atharva Bibave
