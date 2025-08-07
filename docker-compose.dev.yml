@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas-automation-db-dev
+    environment:
+      POSTGRES_DB: saas_automation_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - saas-dev-network
+    restart: unless-stopped
+
+  # Redis for development
+  redis:
+    image: redis:7-alpine
+    container_name: saas-automation-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - saas-dev-network
+    restart: unless-stopped
+
+  # Development Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: saas-automation-app-dev
+    environment:
+      # Database
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/saas_automation_dev
+      
+      # Authentication (Clerk)
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      
+      # Stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      
+      # Google Drive
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI}
+      
+      # Discord
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      
+      # Slack
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+      
+      # Notion
+      NOTION_CLIENT_ID: ${NOTION_CLIENT_ID}
+      NOTION_CLIENT_SECRET: ${NOTION_CLIENT_SECRET}
+      
+      # Webhook URLs
+      NGROK_URI: ${NGROK_URI}
+      CRON_JOB_KEY: ${CRON_JOB_KEY}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # Node Environment
+      NODE_ENV: development
+      
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - saas-dev-network
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - ./certificates:/app/certificates:ro
+      - ./logs:/app/logs
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  saas-dev-network:
+    driver: bridge 
