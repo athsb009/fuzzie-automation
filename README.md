@@ -11,6 +11,28 @@ A powerful workflow automation platform that connects multiple services like Goo
 - **Webhook Support**: Trigger workflows via Google Drive changes
 - **Dashboard Analytics**: Real-time insights into workflow performance
 
+## 📸 Screenshots
+
+### Landing Page & Pricing
+![Fuzzie Landing Page](https://github.com/user-attachments/assets/landing-page-pricing.png)
+*Flexible pricing plans: Hobby (Free), Pro ($29/mo), and Unlimited ($99/mo) with credit-based automation system*
+
+### Dashboard Overview
+![Dashboard](https://github.com/user-attachments/assets/dashboard-overview.png)
+*Comprehensive dashboard showing workflow statistics, execution metrics, success rates, and service connection status*
+
+### Service Connections
+![Connections](https://github.com/user-attachments/assets/service-connections.png)
+*Easy integration with popular services including Google Drive, Discord, Slack, and Notion*
+
+### Visual Workflow Builder
+![Workflow Editor](https://github.com/user-attachments/assets/workflow-editor.png)
+*Intuitive drag-and-drop workflow builder with conditional logic, triggers, and actions for seamless automation*
+
+### Billing & Credits
+![Billing System](https://github.com/user-attachments/assets/billing-credits.png)
+*Transparent credit tracking system with real-time usage monitoring and flexible subscription options*
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
