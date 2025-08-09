@@ -33,6 +33,104 @@ A powerful workflow automation platform that connects multiple services like Goo
 ![Billing System](./screenshots/billing-credits.png)
 *Transparent credit tracking system with real-time usage monitoring and flexible subscription options*
 
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        UI[Next.js 15 Frontend<br/>React 19 + TypeScript]
+        Auth[Clerk Authentication]
+        UI --> Auth
+    end
+
+    subgraph "API Layer"
+        API[Next.js API Routes]
+        Webhooks[Webhook Handlers]
+        API --> Webhooks
+    end
+
+    subgraph "Core Services"
+        WE[Workflow Engine]
+        EL[Execution Logger]
+        CS[Credit System]
+        WE --> EL
+        WE --> CS
+    end
+
+    subgraph "Database Layer"
+        DB[(PostgreSQL Database)]
+        Prisma[Prisma ORM]
+        Prisma --> DB
+    end
+
+    subgraph "External Services"
+        Google[Google Drive API]
+        Discord[Discord API]
+        Slack[Slack API]
+        Notion[Notion API]
+        Stripe[Stripe Payments]
+    end
+
+    subgraph "Monitoring & Analytics"
+        Analytics[Real-time Analytics]
+        Logs[Activity Logs]
+        Metrics[Performance Metrics]
+    end
+
+    %% Frontend connections
+    UI --> API
+    Auth --> API
+
+    %% API to Core Services
+    API --> WE
+    API --> CS
+    API --> Analytics
+
+    %% Core Services to Database
+    WE --> Prisma
+    EL --> Prisma
+    CS --> Prisma
+    Analytics --> Prisma
+
+    %% External API connections
+    API --> Google
+    API --> Discord
+    API --> Slack
+    API --> Notion
+    API --> Stripe
+
+    %% Webhook connections
+    Google -.-> Webhooks
+    Discord -.-> Webhooks
+    Slack -.-> Webhooks
+    Notion -.-> Webhooks
+
+    %% Workflow execution flow
+    WE --> Google
+    WE --> Discord
+    WE --> Slack
+    WE --> Notion
+
+    %% Monitoring connections
+    WE --> Logs
+    API --> Metrics
+
+    %% Styling
+    classDef frontend fill:#e1f5fe
+    classDef api fill:#f3e5f5
+    classDef core fill:#e8f5e8
+    classDef database fill:#fff3e0
+    classDef external fill:#fce4ec
+    classDef monitoring fill:#f1f8e9
+
+    class UI,Auth frontend
+    class API,Webhooks api
+    class WE,EL,CS core
+    class DB,Prisma database
+    class Google,Discord,Slack,Notion,Stripe external
+    class Analytics,Logs,Metrics monitoring
+```
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
