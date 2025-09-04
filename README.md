@@ -12,9 +12,10 @@ A powerful workflow automation platform that connects multiple services like Goo
 - **Dashboard Analytics**: Real-time insights into workflow performance
 
 ## 📸 Screenshots
-
+### Landing Page
+![Fuzzie Landing Page](./screenshots/landing-page.png)
 ### Landing Page & Pricing
-![Fuzzie Landing Page](./screenshots/landing-page-pricing.png)
+![Fuzzie Landing Page Price](./screenshots/landing-page-pricing.png)
 *Flexible pricing plans: Hobby (Free), Pro ($29/mo), and Unlimited ($99/mo) with credit-based automation system*
 
 ### Dashboard Overview
