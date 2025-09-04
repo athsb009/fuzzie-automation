@@ -7,6 +7,24 @@ import { db } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
 import { currentUser } from '@clerk/nextjs/server'
 
+// Simple event publisher for workflow events
+const publishWorkflowEvent = async (eventType: string, workflowId: string, userId: string, data?: any) => {
+  try {
+    console.log('📨 Workflow Event:', {
+      type: eventType,
+      workflowId,
+      userId,
+      timestamp: new Date().toISOString(),
+      data
+    });
+    
+    // TODO: Replace with actual Kafka publishing when API routes are fixed
+    // For now, we'll just log the events
+  } catch (error) {
+    console.error('Failed to publish workflow event:', error);
+  }
+};
+
 export const getGoogleListener = async () => {
   const { userId } = await auth()
 
@@ -26,6 +44,8 @@ export const getGoogleListener = async () => {
 
 export const onFlowPublish = async (workflowId: string, state: boolean) => {
   console.log(state)
+  const { userId } = await auth()
+  
   const published = await db.workflows.update({
     where: {
       id: workflowId,
@@ -34,6 +54,11 @@ export const onFlowPublish = async (workflowId: string, state: boolean) => {
       publish: state,
     },
   })
+
+  // Publish workflow publish event
+  if (userId) {
+    await publishWorkflowEvent('workflow.published', workflowId, userId, { published: state });
+  }
 
   if (published.publish) return 'Workflow published'
   return 'Workflow unpublished'
@@ -47,6 +72,8 @@ export const onCreateNodeTemplate = async (
   accessToken?: string,
   notionDbId?: string
 ) => {
+  const { userId } = await auth()
+  
   if (type === 'Discord') {
     const response = await db.workflows.update({
       where: {
@@ -58,6 +85,10 @@ export const onCreateNodeTemplate = async (
     })
 
     if (response) {
+      // Publish template update event
+      if (userId) {
+        await publishWorkflowEvent('workflow.template_updated', workflowId, userId, { type, template: content });
+      }
       return 'Discord template saved'
     }
   }
@@ -97,6 +128,10 @@ export const onCreateNodeTemplate = async (
           },
         })
 
+        // Publish template update event
+        if (userId) {
+          await publishWorkflowEvent('workflow.template_updated', workflowId, userId, { type, template: content });
+        }
         return 'Slack template saved'
       }
       // Save all channels at once
@@ -109,6 +144,10 @@ export const onCreateNodeTemplate = async (
           slackChannels: channelValues,
         },
       })
+      // Publish template update event
+      if (userId) {
+        await publishWorkflowEvent('workflow.template_updated', workflowId, userId, { type, template: content });
+      }
       return 'Slack template saved'
     }
   }
@@ -125,7 +164,13 @@ export const onCreateNodeTemplate = async (
       },
     })
 
-    if (response) return 'Notion template saved'
+    if (response) {
+      // Publish template update event
+      if (userId) {
+        await publishWorkflowEvent('workflow.template_updated', workflowId, userId, { type, template: content });
+      }
+      return 'Notion template saved'
+    }
   }
 }
 
@@ -155,7 +200,11 @@ export const onCreateWorkflow = async (name: string, description: string) => {
       },
     })
 
-    if (workflow) return { message: 'workflow created' }
+    // Publish workflow creation event
+    if (workflow) {
+      await publishWorkflowEvent('workflow.created', workflow.id, user.id, { name, description });
+      return { message: 'workflow created' }
+    }
     return { message: 'Oops! try again' }
   }
 }
