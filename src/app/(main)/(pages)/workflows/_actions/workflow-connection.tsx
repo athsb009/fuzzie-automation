@@ -7,19 +7,35 @@ import { db } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
 import { currentUser } from '@clerk/nextjs/server'
 
-// Simple event publisher for workflow events
+// Event publisher for workflow events with Kafka integration
 const publishWorkflowEvent = async (eventType: string, workflowId: string, userId: string, data?: any) => {
   try {
-    console.log('📨 Workflow Event:', {
+    const event = {
       type: eventType,
       workflowId,
       userId,
       timestamp: new Date().toISOString(),
       data
-    });
+    };
     
-    // TODO: Replace with actual Kafka publishing when API routes are fixed
-    // For now, we'll just log the events
+    console.log('📨 Workflow Event:', event);
+    
+    // Publish to Kafka if available
+    try {
+      const { simpleKafkaProducer } = await import('@/lib/kafka');
+      await simpleKafkaProducer.connect();
+      await simpleKafkaProducer.sendWorkflowEvent({
+        type: eventType as any,
+        workflowId,
+        userId,
+        timestamp: event.timestamp,
+        data
+      });
+      console.log('✅ Event published to Kafka successfully');
+    } catch (kafkaError) {
+      // Fallback to logging if Kafka is unavailable
+      console.warn('⚠️ Kafka unavailable, event logged only:', kafkaError);
+    }
   } catch (error) {
     console.error('Failed to publish workflow event:', error);
   }

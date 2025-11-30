@@ -1,6 +1,8 @@
 // Workflow Event Consumer
 // This service processes workflow events from Kafka
 
+import { simpleKafkaConsumer, KAFKA_TOPICS, WorkflowEventMessage, consumer } from './kafka';
+
 interface WorkflowEvent {
   type: string;
   workflowId: string;
@@ -21,14 +23,58 @@ class WorkflowEventConsumer {
     this.isRunning = true;
     console.log('🚀 Starting Workflow Event Consumer...');
     
-    // For now, we'll simulate event processing
-    // In a full implementation, this would connect to Kafka and consume events
-    this.simulateEventProcessing();
+    try {
+      // Connect to Kafka consumer
+      await consumer.connect();
+      
+      // Subscribe to workflow events topic
+      await consumer.subscribe({ topic: KAFKA_TOPICS.WORKFLOW_EVENTS });
+      
+      // Start consuming messages
+      await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+          try {
+            const messageData = JSON.parse(message.value?.toString() || '{}') as WorkflowEventMessage;
+            console.log('📨 Received workflow event from Kafka:', {
+              topic,
+              partition,
+              type: messageData.type,
+              workflowId: messageData.workflowId
+            });
+            
+            // Process the workflow event
+            await this.processWorkflowEvent({
+              type: messageData.type,
+              workflowId: messageData.workflowId,
+              userId: messageData.userId,
+              timestamp: messageData.timestamp,
+              data: messageData.data
+            });
+          } catch (error) {
+            console.error('❌ Error processing workflow event from Kafka:', error);
+          }
+        }
+      });
+      
+      console.log('✅ Workflow Event Consumer started and listening for events');
+    } catch (error) {
+      console.error('❌ Failed to start workflow consumer:', error);
+      this.isRunning = false;
+      // Fallback to simulation if Kafka is unavailable
+      console.log('⚠️ Falling back to simulated event processing');
+      this.simulateEventProcessing();
+    }
   }
 
   async stop() {
     this.isRunning = false;
     console.log('🛑 Stopping Workflow Event Consumer...');
+    try {
+      await consumer.disconnect();
+      console.log('✅ Workflow consumer disconnected');
+    } catch (error) {
+      console.error('Error disconnecting consumer:', error);
+    }
   }
 
   private async simulateEventProcessing() {
@@ -76,11 +122,7 @@ class WorkflowEventConsumer {
       description: event.data?.description
     });
     
-    // Here you could:
-    // - Send welcome email
-    // - Initialize analytics
-    // - Create default templates
-    // - Update user statistics
+
   }
 
   private async handleWorkflowPublished(event: WorkflowEvent) {
@@ -90,11 +132,6 @@ class WorkflowEventConsumer {
       published: event.data?.published
     });
     
-    // Here you could:
-    // - Start monitoring the workflow
-    // - Send notifications to team members
-    // - Update workflow status in external systems
-    // - Initialize webhook listeners
   }
 
   private async handleTemplateUpdated(event: WorkflowEvent) {
@@ -104,19 +141,12 @@ class WorkflowEventConsumer {
       type: event.data?.type,
       template: event.data?.template?.substring(0, 50) + '...'
     });
-    
-    // Here you could:
-    // - Validate template syntax
-    // - Update external service configurations
-    // - Send template change notifications
-    // - Update workflow version history
+
   }
 }
 
-// Export singleton instance
+// Export singleton instance of WorkflowEventConsumer
 export const workflowEventConsumer = new WorkflowEventConsumer();
 
 // Auto-start the consumer in development
-if (process.env.NODE_ENV === 'development') {
-  workflowEventConsumer.start().catch(console.error);
-}
+if (process.env.NODE_ENV === 'development') workflowEventConsumer.start().catch(console.error);
