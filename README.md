@@ -7,11 +7,9 @@ A powerful workflow automation platform that connects multiple services like Goo
 - **Visual Workflow Builder**: Drag-and-drop interface for creating automation workflows
 - **Multi-Service Integration**: Connect with Google Drive, Discord, Slack, Notion, and more
 - **Real-time Execution**: Monitor workflow executions with detailed logging
-- **Event-Driven Architecture**: Apache Kafka for scalable, asynchronous workflow processing
 - **Credit System**: Pay-per-use model with credit tracking
 - **Webhook Support**: Trigger workflows via Google Drive changes
 - **Dashboard Analytics**: Real-time insights into workflow performance
-- **Asynchronous Processing**: Background workflow execution with event streaming
 
 ## 📸 Screenshots
 ### Landing Page
